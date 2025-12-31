@@ -14,19 +14,20 @@ def main():
     parser = argparse.ArgumentParser(description="Molmo Standalone Inference")
     parser.add_argument("--image", required=True, help="Path to the image file")
     parser.add_argument("--prompt", required=True, help="Text prompt for the model")
-    parser.add_argument("--model-path", default="allenai/Molmo-7B-D-0924", help="Model path (default: allenai/Molmo-7B-D-0924)")
-    parser.add_argument("--max-tokens", type=int, default=200, help="Maximum tokens to generate (default: 200)")
+    parser.add_argument("--model-path", default="allenai/Molmo-7B-O-0924", help="Model path (default: allenai/Molmo-7B-O-0924)")
+    parser.add_argument("--max-tokens", type=int, default=500, help="Maximum tokens to generate (default: 500)")
 
     args = parser.parse_args()
+    device = "cuda:7" if torch.cuda.is_available() else "cpu"
 
-    print(f"Loading model from {args.model_path}...")
+    print(f"Loading model from {args.model_path} on device {device}...")
 
     # Load processor
     processor = AutoProcessor.from_pretrained(
         args.model_path,
         trust_remote_code=True,
         torch_dtype='auto',
-        device_map='auto'
+        device_map=device
     )
 
     # Load model
@@ -34,7 +35,7 @@ def main():
         args.model_path,
         trust_remote_code=True,
         torch_dtype='auto',
-        device_map='auto'
+        device_map=device
     )
 
     # Convert to bfloat16 for efficiency if CUDA is available
@@ -42,6 +43,7 @@ def main():
         model = model.to(dtype=torch.bfloat16)
 
     print(f"Model loaded successfully.")
+    print(model)
 
     # Load image
     image = Image.open(args.image).convert("RGB")

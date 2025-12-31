@@ -89,7 +89,7 @@ async def lifespan(app: FastAPI):
         model_path,
         trust_remote_code=True,
         torch_dtype='auto',
-        device_map='auto'
+        device_map='cuda:0'
     )
 
     # Load model
@@ -97,7 +97,7 @@ async def lifespan(app: FastAPI):
         model_path,
         trust_remote_code=True,
         torch_dtype='auto',
-        device_map='auto'
+        device_map='cuda:0'
     )
 
     # Convert to bfloat16 for efficiency if CUDA is available
@@ -258,7 +258,7 @@ async def chat_completions(request: ChatCompletionRequest):
 if __name__ == "__main__":
     host = os.getenv("MOLMO_HOST", "0.0.0.0")
     port = os.getenv("MOLMO_PORT", 8001)
-    model_path = os.getenv("MOLMO_MODEL_PATH", "allenai/Molmo-7B-D-0924")
+    model_path = os.getenv("MOLMO_MODEL_PATH", "allenai/Molmo-7B-O-0924")
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", type=str, default=host)
