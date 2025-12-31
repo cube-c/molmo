@@ -85,7 +85,7 @@ def main():
     parser = argparse.ArgumentParser(description="Molmo Server Client")
     parser.add_argument("--image", required=True, help="Path to the image file")
     parser.add_argument("--prompt", required=True, help="Text prompt for the model")
-    parser.add_argument("--model", default="Molmo-7B-D-0924", help="Model name (default: Molmo-7B-D-0924)")
+    parser.add_argument("--model", default="Molmo-7B-O-0924", help="Model name (default: Molmo-7B-O-0924)")
     parser.add_argument("--host", default="localhost", help="Server host (default: localhost)")
     parser.add_argument("--port", type=int, default=8001, help="Server port (default: 8001)")
     parser.add_argument("--max-tokens", type=int, default=1000, help="Maximum tokens to generate (default: 1000)")

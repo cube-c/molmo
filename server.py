@@ -80,6 +80,7 @@ async def lifespan(app: FastAPI):
     global model, model_name, processor
 
     model_path = app.args.model_path
+    checkpoint_path = app.args.checkpoint_path
     model_name = model_path.split("/")[-1] if "/" in model_path else model_path
 
     print(f"Loading Molmo model from {model_path}...")
@@ -99,6 +100,28 @@ async def lifespan(app: FastAPI):
         torch_dtype='auto',
         device_map='cuda:0'
     )
+
+    # Load checkpoint if provided
+    if checkpoint_path:
+        print(f"Loading checkpoint from {checkpoint_path}...")
+        checkpoint_file = os.path.join(checkpoint_path, "model.pt")
+        if not os.path.exists(checkpoint_file):
+            raise FileNotFoundError(f"Checkpoint file not found: {checkpoint_file}")
+
+        # Load checkpoint state dict
+        checkpoint_state_dict = torch.load(checkpoint_file, map_location='cpu')
+
+        # Add "model." prefix to all keys to match HuggingFace format
+        prefixed_state_dict = {f"model.{k}": v for k, v in checkpoint_state_dict.items()}
+
+        # Load state dict into model
+        missing_keys, unexpected_keys = model.load_state_dict(prefixed_state_dict, strict=False)
+        if missing_keys:
+            print(f"Warning: Missing keys in checkpoint: {missing_keys}")
+        if unexpected_keys:
+            print(f"Warning: Unexpected keys in checkpoint: {unexpected_keys}")
+
+        print(f"Checkpoint loaded successfully from {checkpoint_path}")
 
     # Convert to bfloat16 for efficiency if CUDA is available
     if torch.cuda.is_available():
@@ -259,11 +282,14 @@ if __name__ == "__main__":
     host = os.getenv("MOLMO_HOST", "0.0.0.0")
     port = os.getenv("MOLMO_PORT", 8001)
     model_path = os.getenv("MOLMO_MODEL_PATH", "allenai/Molmo-7B-O-0924")
+    checkpoint_path = os.getenv("MOLMO_CHECKPOINT_PATH", None)
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", type=str, default=host)
     parser.add_argument("--port", type=int, default=port)
     parser.add_argument("--model-path", type=str, default=model_path)
+    parser.add_argument("--checkpoint-path", type=str, default=checkpoint_path,
+                        help="Path to local checkpoint directory containing model.pt")
 
     app.args = parser.parse_args()
     port = int(app.args.port)
