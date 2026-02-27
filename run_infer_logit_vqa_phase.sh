@@ -3,7 +3,7 @@
 set -euo pipefail
 
 IMAGE_ROOT="/app/blender"
-VQA_JSON="/app/blender/output/phasevar_4/0/vqa_obj1.json"
+VQA_JSON="/app/blender/output/phasevar/0/vqa_obj1.json"
 
 # VARIANTS="obj1_closer obj2_closer obj1_farther obj2_farther"
 VARIANTS="obj1_closer obj2_closer"
@@ -25,12 +25,12 @@ run_model() {
 
     local BASE_CSV="logit_results_molmo_vqa_phase${SUFFIX}.csv"
 
-    # echo "========== ${LABEL} | phasevar (all variants) | GPU ${GPU} =========="
-    # CUDA_VISIBLE_DEVICES=$GPU python /app/molmo/infer_logit_vqa.py \
-        # --model-path "$MODEL_PATH" \
-        # --vqa-json "$VQA_JSON" \
-        # --image-root "$IMAGE_ROOT" \
-        # --output-csv "$BASE_CSV"
+    echo "========== ${LABEL} | phasevar (all variants) | GPU ${GPU} =========="
+    CUDA_VISIBLE_DEVICES=$GPU python /app/molmo/infer_logit_vqa.py \
+        --model-path "$MODEL_PATH" \
+        --vqa-json "$VQA_JSON" \
+        --image-root "$IMAGE_ROOT" \
+        --output-csv "$BASE_CSV"
 
     echo "========== Plotting per-variant heatmaps =========="
     local VARIANT_CSVS=""
