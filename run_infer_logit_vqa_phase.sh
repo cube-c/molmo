@@ -3,10 +3,10 @@
 set -euo pipefail
 
 IMAGE_ROOT="/app/blender"
-VQA_JSON="/app/blender/output/phasevar/0/vqa_obj1.json"
+VQA_JSON="/app/blender/output/phasevar_4/0/vqa_obj1.json"
 
-# VARIANTS="obj1_closer obj2_closer obj1_farther obj2_farther"
-VARIANTS="obj1_closer obj2_closer"
+VARIANTS="obj1_closer obj2_closer obj1_farther obj2_farther"
+# VARIANTS="obj1_closer obj2_closer"
 
 # model_path|suffix|label|gpu
 MODELS=(
