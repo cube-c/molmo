@@ -62,11 +62,11 @@ def load_model_and_processor(model_path: str):
 
 @torch.inference_mode()
 def get_yes_no_logits(model, processor, image_path, text, device=None):
-    """Run a forward pass and return logits for 'Yes' and 'No' tokens."""
+    """Run a forward pass and return logits for 'Yes'/'No' tokens plus the real generated response."""
     tokenizer = processor.tokenizer
 
-    yes_id = tokenizer.encode("Yes", add_special_tokens=False)[0]
-    no_id = tokenizer.encode("No", add_special_tokens=False)[0]
+    yes_id = tokenizer.encode(" Yes", add_special_tokens=False)[0]
+    no_id = tokenizer.encode(" No", add_special_tokens=False)[0]
 
     image = Image.open(image_path).convert("RGB")
     inputs = processor.process(images=[image], text=text)
@@ -76,12 +76,36 @@ def get_yes_no_logits(model, processor, image_path, text, device=None):
 
     # For native models, filter to only forward-compatible keys
     if _NATIVE_FORWARD_KEYS is not None:
-        inputs = {k: v for k, v in inputs.items() if k in _NATIVE_FORWARD_KEYS}
+        fwd_inputs = {k: v for k, v in inputs.items() if k in _NATIVE_FORWARD_KEYS}
+    else:
+        fwd_inputs = inputs
 
-    outputs = model(**inputs)
+    # --- logits ---
+    outputs = model(**fwd_inputs)
     last_logits = outputs.logits[0, -1, :]
 
-    return last_logits[yes_id].item(), last_logits[no_id].item()
+    # --- greedy generation for real response ---
+    # input_len = inputs["input_ids"].shape[1]
+    # if _NATIVE_FORWARD_KEYS is not None:
+        # # Native Molmo: generate() uses max_steps and beam_size
+        # gen_out = model.generate(
+            # input_ids=inputs["input_ids"],
+            # images=inputs.get("images"),
+            # image_masks=inputs.get("image_masks"),
+            # image_input_idx=inputs.get("image_input_idx"),
+            # max_steps=32,
+            # beam_size=1,
+        # )
+        # # token_ids shape: (batch, beam, steps) — does not include input
+        # gen_ids = gen_out.token_ids[0, 0]  # first batch, first beam
+        # response = tokenizer.decode(gen_ids, skip_special_tokens=True).strip()
+    # else:
+        # from transformers import GenerationConfig
+        # gen_config = GenerationConfig(max_new_tokens=32, do_sample=False, use_cache=True)
+        # gen_ids = model.generate_from_batch(inputs, generation_config=gen_config)
+        # response = tokenizer.decode(gen_ids[0, input_len:], skip_special_tokens=True).strip()
+
+    return last_logits[yes_id].item(), last_logits[no_id].item(), ""
 
 
 VARIANTS = {
@@ -146,7 +170,7 @@ def main() -> None:
             image_path = os.path.join(args.image_root, entry["image"])
             question, gt = build_yes_no_question(entry, variant)
 
-            yes_logit, no_logit = get_yes_no_logits(model, processor, image_path, question, device)
+            yes_logit, no_logit, response = get_yes_no_logits(model, processor, image_path, question, device)
             pred = "Yes" if yes_logit > no_logit else "No"
             is_correct = pred == gt
 
@@ -160,18 +184,20 @@ def main() -> None:
                 "question": question,
                 "ground_truth": gt,
                 "prediction": pred,
+                "response": response,
                 "Yes_logit": yes_logit,
                 "No_logit": no_logit,
                 "correct": is_correct,
             })
             print(f"[{i+1}/{len(vqa_data)}] {os.path.basename(entry['image'])}: "
-                  f"Yes={yes_logit:.4f}, No={no_logit:.4f} | pred={pred} gt={gt} {'OK' if is_correct else 'WRONG'}")
+                  f"Yes={yes_logit:.4f}, No={no_logit:.4f} | pred={pred} gt={gt} "
+                  f"resp=\"{response}\" {'OK' if is_correct else 'WRONG'}")
 
         acc = correct / len(vqa_data) * 100 if vqa_data else 0
         print(f"\nAccuracy ({variant}): {correct}/{len(vqa_data)} ({acc:.1f}%)")
 
         fieldnames = ["model_path", "variant", "image", "question", "ground_truth", "prediction",
-                      "Yes_logit", "No_logit", "correct"]
+                      "response", "Yes_logit", "No_logit", "correct"]
         with open(out_csv, "w", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
