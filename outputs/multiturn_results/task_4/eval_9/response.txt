@@ -1,0 +1,7 @@
+Turn 1 Response:
+ The destination point on the target surface is the plate with the red rim.
+
+Turn 2 Response:
+ The plate with the red rim is located at point (0.755, 0.722).
+
+Parsed Coordinates: [773, 739]

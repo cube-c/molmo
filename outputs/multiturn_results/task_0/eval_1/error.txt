@@ -1,0 +1,6 @@
+Error: No point found in Molmo response (tried XML and tuple formats):  The pick-up point is on the rim of the black bowl.
+Turn 1 Response:
+ The black bowl on the stove is to be picked up and placed on the plate.
+
+Turn 2 Response:
+ The pick-up point is on the rim of the black bowl.

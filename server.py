@@ -163,29 +163,52 @@ async def chat_completions(request: ChatCompletionRequest):
 
         # Parse messages to extract images and text
         images = []
-        text_parts = []
+        conversation = []
 
-        for message in request.messages:
-            if isinstance(message.content, str):
-                text_parts.append(message.content)
-            elif isinstance(message.content, list):
-                for content in message.content:
-                    if content.type == "text":
-                        text_parts.append(content.text)
-                    elif content.type == "image_url":
-                        image = load_image(content.image_url.url)
-                        images.append(image)
+        def _msg_to_text_and_images(msg: ChatMessage) -> str:
+            parts: list[str] = []
+
+            if isinstance(msg.content, str):
+                parts.append(msg.content)
+            else:
+                for item in msg.content:
+                    if item.type == "text":
+                        parts.append(item.text)
+                    elif item.type == "image_url":
+                        images.append(load_image(item.image_url.url))
                     else:
-                        raise NotImplementedError(f"Unsupported content type: {content.type}")
+                        raise NotImplementedError(f"Unsupported content type: {item.type}")
 
-        # Combine text parts
-        prompt = " ".join(text_parts)
+            return " ".join(p for p in parts if p).strip()
+
+        # Merge consecutive messages with the same role (Molmo chat_template requires alternation)
+        for msg in request.messages:
+            text = _msg_to_text_and_images(msg)
+            if not text:
+                continue
+            if conversation and conversation[-1]["role"] == msg.role:
+                conversation[-1]["content"] += "\n" + text
+            else:
+                conversation.append({"role": msg.role, "content": text})
+
+        # Build the multi-turn prompt using the tokenizer's built-in chat template (Molmo-7B-O has one)
+        prompt = processor.tokenizer.apply_chat_template(
+            conversation,
+            tokenize=False,
+            add_generation_prompt=True
+        )
+        print("\nPrompt:\n", prompt)
+
+        # IMPORTANT:
+        # Pass tokens=... to processor.process() so the processor does NOT wrap again with "User: ... Assistant:"
+        tokens = processor.tokenizer.encode(" " + prompt, add_special_tokens=False)
+
 
         try:
-            # Process inputs
+            # Now call the processor using tokens, not text
             inputs = processor.process(
                 images=images if images else None,
-                text=prompt
+                tokens=tokens
             )
         except Exception as e:
             raise ValueError(f"Error at line: processor.process() - {str(e)}")
@@ -273,7 +296,7 @@ async def chat_completions(request: ChatCompletionRequest):
             globallock.release()
 
         return JSONResponse(
-            status_code=500,
+            status_code=400,
             content={"error": str(e)},
         )
 

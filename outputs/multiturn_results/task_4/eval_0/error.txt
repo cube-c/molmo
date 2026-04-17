@@ -1,0 +1,6 @@
+Error: No point found in Molmo response (tried XML and tuple formats):  The destination point is the plate with the red and white rim.
+Turn 1 Response:
+ The destination point on the target surface is the plate with the red and white rim.
+
+Turn 2 Response:
+ The destination point is the plate with the red and white rim.

@@ -1,0 +1,7 @@
+Turn 1 Response:
+ The black bowl on the cookie box is to be picked up and placed on the plate.
+
+Turn 2 Response:
+ <point x="54.9" y="69.9" alt="Where to grasp the object">Where to grasp the object</point>
+
+Parsed Coordinates: [562, 715]

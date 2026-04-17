@@ -1,0 +1,7 @@
+Turn 1 Response:
+ The black bowl is to be picked up from the left side of the ramekin.
+
+Turn 2 Response:
+ <point x="42.9" y="84.9" alt="Where to grasp the object">Where to grasp the object</point>
+
+Parsed Coordinates: [439, 869]

@@ -1,0 +1,7 @@
+Turn 1 Response:
+ The black bowl between the plate and the ramekin is the object to pick up.
+
+Turn 2 Response:
+ <point x="78.9" y="53.3" alt="Where to grasp the object">Where to grasp the object</point>
+
+Parsed Coordinates: [807, 545]

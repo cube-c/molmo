@@ -1,0 +1,7 @@
+Turn 1 Response:
+ The destination point on the target surface is the plate, which is located at point (0.755, 0.812).
+
+Turn 2 Response:
+ The plate is located at point (0.755, 0.812).
+
+Parsed Coordinates: [773, 831]

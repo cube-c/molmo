@@ -1,0 +1,7 @@
+Turn 1 Response:
+ The black bowl from table center is to be picked up by the gripper.
+
+Turn 2 Response:
+ <point x="49.9" y="54.9" alt="Where to grasp the object">Where to grasp the object</point>
+
+Parsed Coordinates: [510, 562]
