@@ -1,0 +1,7 @@
+========== Plotting per-variant heatmaps ==========
+Saved logit_heatmap_molmo_vqa_phase_400k_obj1_closer.png
+Saved logit_heatmap_molmo_vqa_phase_400k_obj2_closer.png
+========== Plotting aggregate heatmap ==========
+Loaded 768 rows from logit_results_molmo_vqa_phase_400k_obj1_closer.csv
+Loaded 768 rows from logit_results_molmo_vqa_phase_400k_obj2_closer.csv
+Saved logit_heatmap_molmo_vqa_phase_400k_agg.png

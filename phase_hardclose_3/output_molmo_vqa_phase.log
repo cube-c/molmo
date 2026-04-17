@@ -1,0 +1,5 @@
+========== Molmo-7B-O | phasevar (all variants) | GPU 0 ==========
+Traceback (most recent call last):
+  File "/app/molmo/infer_logit_vqa.py", line 6, in <module>
+    import torch
+ModuleNotFoundError: No module named 'torch'
